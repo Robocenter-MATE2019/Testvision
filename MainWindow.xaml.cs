@@ -33,7 +33,7 @@ namespace Testvision
         private VideoCapture _capture = new VideoCapture();
         private Recognition Recognition = new Recognition();
         private FiguresView figuresView = new FiguresView(new FiguresModel());
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -133,41 +133,11 @@ namespace Testvision
         private void VTimer_Tick(object sender, EventArgs e)
         {
             Mat image = _capture.QueryFrame();
-            Mat binImage = Recognition.Binarization(image);
-            VectorOfVectorOfPoint findfigures = Recognition.Finding_Contours(binImage);
-            int circles = 0, lines = 0, triangles  = 0, squares = 0;
-            for (int i = 0; i < findfigures.Size; i++)
-            {
-                if (CvInvoke.ContourArea(findfigures[i]) > 10)
-                {
-                    if (Recognition.Is_Circle(findfigures[i]))
-                    {
-                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(0, 0, 255), 3);
-                        circles++;
-                    }
-                    else if (Recognition.Is_Rectangle(findfigures[i]))
-                    {
-                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(255, 0, 255), 3);
-                        lines++;
-                    }
-                    else if (Recognition.Is_Square(findfigures[i]))
-                    {
-                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(255, 0, 0), 3);
-                        squares++;
-                    }
-                    else if (Recognition.Is_Triangle(findfigures[i]))
-                    {
-                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(0, 255, 0), 3);
-                        triangles++;
-                    }
-                    
-                }
-            }
-            figuresView.Circles = circles;
-            figuresView.Lines = lines;
-            figuresView.Squares = squares;
-            figuresView.Triangles = triangles;
-            Image1.Source = BitmapSourceConvert.ToBitmapSource(image.ToImage<Bgr, Byte>());
+            Image1.Source = Recognition.FindFigures(image);
+            figuresView.Circles = Recognition.Circles;
+            figuresView.Lines = Recognition.Lines;
+            figuresView.Triangles = Recognition.Triangles;
+            figuresView.Squares = Recognition.Squares;
         }
     }
 }

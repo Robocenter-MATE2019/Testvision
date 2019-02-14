@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
@@ -16,6 +17,48 @@ namespace Testvision
        private Mat binMat = new Mat();
        private VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
 
+        public int Circles      { get; set; }
+        public int Lines        { get; set; }
+        public int Triangles    { get; set; }
+        public int Squares      { get; set; }
+
+        public BitmapSource FindFigures(Mat image)
+        {
+            Mat binImage = Binarization(image);
+            VectorOfVectorOfPoint findfigures = Finding_Contours(binImage);
+            Circles     = 0;
+            Triangles   = 0;
+            Squares     = 0;
+            Lines       = 0;
+            for (int i = 0; i < findfigures.Size; i++)
+            {
+                if (CvInvoke.ContourArea(findfigures[i]) > 10)
+                {
+                    if (Is_Circle(findfigures[i]))
+                    {
+                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(0, 0, 255), 3);
+                        Circles++;
+                    }
+                    else if (Is_Rectangle(findfigures[i]))
+                    {
+                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(255, 0, 255), 3);
+                        Lines++;
+                    }
+                    else if (Is_Square(findfigures[i]))
+                    {
+                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(255, 0, 0), 3);
+                        Squares++;
+                    }
+                    else if (Is_Triangle(findfigures[i]))
+                    {
+                        CvInvoke.DrawContours(image, findfigures, i, new MCvScalar(0, 255, 0), 3);
+                        Triangles++;
+                    }
+
+                }
+            }
+            return BitmapSourceConvert.ToBitmapSource(image.ToImage<Bgr, Byte>()); 
+        }
         public Mat Binarization(Mat source)
         {
             if (source.IsEmpty) return source;
